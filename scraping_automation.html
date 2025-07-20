@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scraping & Automation – Coming Soon</title>
+    <style>
+        /* Basic Setup and Theming */
+        :root {
+            --background-color: #000005;
+            --text-color: rgba(255, 255, 255, 0.95);
+            --subtitle-color: rgba(255, 255, 255, 0.7);
+            --glow-color-1: #00ffff; /* Cyan */
+            --glow-color-2: #9f7aea; /* Violet */
+            --glass-bg: rgba(17, 24, 39, 0.3);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            overflow: hidden;
+        }
+
+        /* Canvas Background */
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            outline: none;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* UI Elements Layer */
+        .ui-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none; /* Allows mouse events to pass through to the canvas */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Back Button */
+        .back-link {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            padding: 0.75rem 1.25rem;
+            background: var(--glass-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 9999px;
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: background-color 0.3s, transform 0.3s;
+            pointer-events: auto; /* Re-enable pointer events for this element */
+            z-index: 100;
+        }
+
+        .back-link:hover {
+            background: rgba(17, 24, 39, 0.6);
+            transform: translateY(-2px);
+        }
+
+        /* Hero Message Container */
+        .hero-message {
+            text-align: center;
+            pointer-events: auto;
+            background: var(--glass-bg);
+            padding: 2.5rem 4rem;
+            border-radius: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .hero-message h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: clamp(1.75rem, 5vw, 3.25rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .hero-message p {
+            margin: 0;
+            font-size: clamp(1rem, 2.5vw, 1.25rem);
+            color: var(--subtitle-color);
+            font-weight: 400;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+            .hero-message {
+                padding: 2rem 1.5rem;
+                margin: 0 1rem;
+            }
+            .back-link {
+                top: 1rem;
+                left: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="particle-canvas"></canvas>
+
+    <a href="index.html" class="back-link">← Back</a>
+
+    <div class="ui-layer">
+        <div class="hero-message">
+            <h1>Scraping & Automation – Coming Soon</h1>
+            <p>Crunching numbers… stay tuned!</p>
+    </div>
+
+    <script>
+        // --- Canvas & Context Setup ---
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let ripples = [];
+
+        // --- Configuration ---
+        const PARTICLE_COUNT = 80;
+        const CONNECTION_DISTANCE = 120;
+        const MOUSE_REPULSION_RADIUS = 150;
+        const DAMPING = 0.98;
+
+        // --- Mouse State ---
+        const mouse = {
+            x: null,
+            y: null,
+            radius: MOUSE_REPULSION_RADIUS
+        };
+
+        // --- Utility Functions ---
+        const setCanvasSize = () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        };
+
+        const distance = (x1, y1, x2, y2) => {
+            const dx = x1 - x2;
+            const dy = y1 - y2;
+            return Math.sqrt(dx * dx + dy * dy);
+        };
+
+        // --- Particle Class ---
+        class Particle {
+            constructor(x, y, radius, color) {
+                this.x = x || Math.random() * canvas.width;
+                this.y = y || Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 2;
+                this.vy = (Math.random() - 0.5) * 2;
+                this.radius = radius || Math.random() * 2 + 1;
+                this.baseColor = color || `hsl(${Math.random() * 360}, 100%, 70%)`;
+                this.glowIntensity = 0;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                
+                // Base color
+                ctx.fillStyle = this.baseColor;
+                
+                // Glow effect
+                ctx.shadowColor = this.baseColor;
+                ctx.shadowBlur = 5 + this.glowIntensity * 15;
+                
+                ctx.fill();
+                ctx.closePath();
+
+                // Reset shadow for other elements
+                ctx.shadowBlur = 0;
+            }
+
+            update() {
+                // Apply damping
+                this.vx *= DAMPING;
+                this.vy *= DAMPING;
+
+                // Move particle
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Wall collision
+                if (this.x + this.radius > canvas.width || this.x - this.radius < 0) this.vx *= -1;
+                if (this.y + this.radius > canvas.height || this.y - this.radius < 0) this.vy *= -1;
+
+                // Mouse interaction
+                this.handleMouseRepulsion();
+                
+                // Fade out glow
+                if (this.glowIntensity > 0) {
+                    this.glowIntensity -= 0.03;
+                }
+                if (this.glowIntensity < 0) {
+                    this.glowIntensity = 0;
+                }
+            }
+            
+            handleMouseRepulsion() {
+                if (mouse.x === null) return;
+                const distToMouse = distance(this.x, this.y, mouse.x, mouse.y);
+                if (distToMouse < mouse.radius) {
+                    const forceDirectionX = this.x - mouse.x;
+                    const forceDirectionY = this.y - mouse.y;
+                    const force = (mouse.radius - distToMouse) / mouse.radius;
+                    this.vx += forceDirectionX * force * 0.1;
+                    this.vy += forceDirectionY * force * 0.1;
+                    this.glowIntensity = 1; // Brighten glow on repulsion
+                }
+            }
+        }
+        
+        // --- Ripple Class ---
+        class Ripple {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.radius = 0;
+                this.maxRadius = 200;
+                this.speed = 4;
+                this.life = 1;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.strokeStyle = `rgba(0, 255, 255, ${this.life * 0.5})`;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.closePath();
+            }
+
+            update() {
+                this.radius += this.speed;
+                this.life -= 0.02;
+
+                // Apply force to nearby particles
+                for (const particle of particles) {
+                    const distToParticle = distance(this.x, this.y, particle.x, particle.y);
+                    if (Math.abs(distToParticle - this.radius) < 20) {
+                        const angle = Math.atan2(particle.y - this.y, particle.x - this.x);
+                        particle.vx += Math.cos(angle) * this.life * 1.5;
+                        particle.vy += Math.sin(angle) * this.life * 1.5;
+                        particle.glowIntensity = 1;
+                    }
+                }
+            }
+        }
+
+        // --- Initialization ---
+        function init() {
+            setCanvasSize();
+            particles = [];
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        // --- Particle-Particle Interactions ---
+        function handleParticles() {
+            for (let i = 0; i < particles.length; i++) {
+                const p1 = particles[i];
+                p1.update();
+                p1.draw();
+
+                for (let j = i + 1; j < particles.length; j++) {
+                    const p2 = particles[j];
+                    const dist = distance(p1.x, p1.y, p2.x, p2.y);
+                    
+                    // Draw connections
+                    if (dist < CONNECTION_DISTANCE) {
+                        ctx.beginPath();
+                        ctx.moveTo(p1.x, p1.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.strokeStyle = `rgba(0, 255, 255, ${1 - dist / CONNECTION_DISTANCE})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.stroke();
+                        ctx.closePath();
+                    }
+                    
+                    // Handle collision
+                    if (dist < p1.radius + p2.radius) {
+                        // Simple elastic collision response
+                        const dx = p2.x - p1.x;
+                        const dy = p2.y - p1.y;
+                        const angle = Math.atan2(dy, dx);
+                        const sin = Math.sin(angle);
+                        const cos = Math.cos(angle);
+
+                        // Rotate velocities
+                        const vx1 = p1.vx * cos + p1.vy * sin;
+                        const vy1 = p1.vy * cos - p1.vx * sin;
+                        const vx2 = p2.vx * cos + p2.vy * sin;
+                        const vy2 = p2.vy * cos - p2.vx * sin;
+                        
+                        // Swap velocities (for equal mass)
+                        const finalVx1 = vx2;
+                        const finalVx2 = vx1;
+
+                        // Rotate back
+                        p1.vx = finalVx1 * cos - vy1 * sin;
+                        p1.vy = vy1 * cos + finalVx1 * sin;
+                        p2.vx = finalVx2 * cos - vy2 * sin;
+                        p2.vy = vy2 * cos + finalVx2 * sin;
+                        
+                        // Move them apart to prevent sticking
+                        const overlap = p1.radius + p2.radius - dist;
+                        p1.x -= overlap * cos * 0.5;
+                        p1.y -= overlap * sin * 0.5;
+                        p2.x += overlap * cos * 0.5;
+                        p2.y += overlap * sin * 0.5;
+                    }
+                }
+            }
+        }
+        
+        // --- Ripple Handling ---
+        function handleRipples() {
+            for (let i = ripples.length - 1; i >= 0; i--) {
+                const ripple = ripples[i];
+                ripple.update();
+                ripple.draw();
+                if (ripple.life <= 0) {
+                    ripples.splice(i, 1);
+                }
+            }
+        }
+
+        // --- Animation Loop ---
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            handleParticles();
+            handleRipples();
+            requestAnimationFrame(animate);
+        }
+
+        // --- Event Listeners ---
+        window.addEventListener('resize', init);
+        window.addEventListener('mousemove', (event) => {
+            mouse.x = event.clientX;
+            mouse.y = event.clientY;
+        });
+        window.addEventListener('mouseout', () => {
+            mouse.x = null;
+            mouse.y = null;
+        });
+        window.addEventListener('click', (event) => {
+            ripples.push(new Ripple(event.clientX, event.clientY));
+        });
+
+        // --- Start ---
+        init();
+        animate();
+    </script>
+</body>
+</html>

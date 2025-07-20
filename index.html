@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Al-Style Portfolio</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans"/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"/>
+  <style>
+    :root{
+      --bg-primary:#000005;
+      --bg-secondary:rgba(20,30,60,0.25);
+      --text-primary:#fff;
+      --text-secondary:#b0b0b0;
+      --google-blue:#4285F4;
+      --google-red:#EA4335;
+      --google-yellow:#FBBC05;
+      --google-green:#34A853;
+      --google-purple:#ab47bc;
+      --accent-cyan:#00e5ff;
+      --glow-cyan:0 0 20px rgba(0,229,255,.6);
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      font-family:'Google Sans',sans-serif;
+      background:var(--bg-primary);
+      color:var(--text-primary);
+      overflow-x:hidden;
+      position:relative;
+    }
+    #galaxy-canvas{
+      position:fixed;
+      top:0;left:0;
+      width:100vw;height:100vh;
+      z-index:-1;
+      pointer-events:none;
+    }
+    .container{max-width:1200px;margin:0 auto;padding:0 1rem}
+    .hero{min-height:60vh;display:flex;align-items:center;justify-content:center;text-align:center;padding-top:2rem}
+    .hero-content{animation:fadeInUp 1s ease-out}
+    .hero h1{font-size:clamp(2.5rem,5vw,4rem);font-weight:300;background:linear-gradient(135deg,var(--google-blue),var(--google-green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.5rem}
+    .hero p{font-size:clamp(1rem,3vw,1.5rem);color:var(--text-secondary)}
+    /* Portfolio Cards */
+    .skills-section{padding:1rem 0 3rem}
+    .skills-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;margin-top:2rem}
+    .skill-card{
+      background:linear-gradient(135deg,rgba(66,133,244,.15),rgba(66,133,244,.05));
+      border:1px solid rgba(66,133,244,.3);
+      border-radius:16px;
+      padding:1.5rem;
+      cursor:pointer;
+      transition:all .3s ease;
+      position:relative;
+      overflow:hidden;
+      backdrop-filter:blur(8px);
+      text-decoration:none;
+      color:inherit;
+      display:block;
+    }
+    .skill-card:hover{transform:translateY(-5px);box-shadow:0 8px 30px rgba(66,133,244,.4);border-color:rgba(66,133,244,.8)}
+    .skill-card.api-dev:hover{box-shadow:0 0 20px rgba(171,71,188,.6);border-color:rgba(171,71,188,.8)}
+    .skill-icon{font-size:2.5rem;margin-bottom:.75rem;display:block}
+    .skill-title{font-size:1.25rem;font-weight:500}
+    .skill-description{font-size:.9rem;color:var(--text-secondary)}
+    /* Tech Skills */
+    .tech-skills{padding:2rem 0;text-align:center}
+    .tech-skills h2{font-size:2rem;font-weight:400;margin-bottom:1.5rem;background:linear-gradient(135deg,var(--accent-cyan),var(--google-blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .skills-cloud{display:flex;flex-wrap:wrap;justify-content:center;gap:.75rem}
+    .skill-tag{background:rgba(66,133,244,.15);border:1px solid rgba(66,133,244,.4);border-radius:999px;padding:.5rem 1rem;font-size:.9rem;transition:all .3s ease;backdrop-filter:blur(4px)}
+    .skill-tag:hover{transform:scale(1.05);background:rgba(66,133,244,.25);box-shadow:0 0 15px rgba(66,133,244,.6)}
+    /* Milestones */
+    .milestone-section{padding:3rem 0;text-align:center}
+    .milestone-section h2{font-size:2rem;font-weight:400;margin-bottom:2rem;background:linear-gradient(90deg,var(--accent-cyan),var(--google-blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .milestone-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1.5rem;max-width:1000px;margin:0 auto}
+    .milestone-card{background:linear-gradient(135deg,rgba(0,229,255,.1),rgba(66,133,244,.05));border:1px solid rgba(0,229,255,.2);border-radius:16px;padding:2rem 1rem;backdrop-filter:blur(10px)}
+    .milestone-number{font-size:2.8rem;font-weight:700;color:#fff;text-shadow:0 0 12px rgba(0,229,255,.8)}
+    .milestone-label{margin-top:.5rem;font-size:.9rem;color:var(--text-secondary)}
+    /* Testimonials */
+    .testimonials{padding:3rem 0}
+    .testimonials h2{text-align:center;font-size:2rem;font-weight:400;margin-bottom:2rem;background:linear-gradient(90deg,var(--google-yellow),var(--google-red));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .testimonial-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem}
+    .testimonial-card{background:linear-gradient(135deg,rgba(66,133,244,.1),rgba(66,133,244,.05));border:1px solid rgba(66,133,244,.3);border-radius:16px;padding:1.5rem;backdrop-filter:blur(8px);opacity:0;transform:translateY(30px);animation:fadeInUp .6s ease forwards}
+    .testimonial-card:nth-child(1){animation-delay:.2s}
+    .testimonial-card:nth-child(2){animation-delay:.4s}
+    .testimonial-card:nth-child(3){animation-delay:.6s}
+    .testimonial-card:nth-child(4){animation-delay:.8s}
+    .testimonial-card:nth-child(5){animation-delay:1s}
+    .testimonial-card:nth-child(6){animation-delay:1.2s}
+    .testimonial-text{font-style:italic;margin-bottom:1rem;opacity:0;animation:fadeIn .8s ease forwards;animation-delay:1s}
+    .testimonial-author{font-weight:500;color:var(--google-blue)}
+    /* Objectives */
+    .objectives-section{padding:3rem 0}
+    .objectives-section h2{text-align:center;font-size:2rem;font-weight:400;margin-bottom:3rem;background:linear-gradient(90deg,var(--google-green),var(--google-blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .objectives-container{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:2rem;max-width:1000px;margin:0 auto}
+    .objective-card{background:linear-gradient(135deg,rgba(52,168,83,.1),rgba(66,133,244,.05));border:1px solid rgba(52,168,83,.3);border-radius:20px;padding:2rem;position:relative;overflow:hidden;transition:all .3s ease;backdrop-filter:blur(10px)}
+    .objective-card:hover{transform:translateY(-10px);box-shadow:0 15px 40px rgba(52,168,83,.3);border-color:rgba(52,168,83,.8)}
+    .objective-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--google-green),var(--google-blue))}
+    .objective-icon{font-size:3rem;margin-bottom:1rem;background:linear-gradient(135deg,var(--google-green),var(--google-blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .objective-title{font-size:1.5rem;font-weight:500;margin-bottom:1rem;color:var(--google-green)}
+    .objective-description{color:var(--text-secondary);line-height:1.6}
+    /* Social Links */
+    .social-section{padding:3rem 0;text-align:center}
+    .social-section h2{font-size:2rem;font-weight:400;margin-bottom:2rem;background:linear-gradient(90deg,var(--google-purple),var(--google-blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .social-grid{display:flex;justify-content:center;gap:1.5rem;flex-wrap:wrap}
+    .social-link{display:flex;align-items:center;gap:.5rem;padding:.75rem 1.5rem;border-radius:50px;text-decoration:none;color:var(--text-primary);transition:all .3s ease;font-weight:500}
+    .social-link.whatsapp{background:linear-gradient(135deg,#25D366,#128C7E)}
+    .social-link.discord{background:linear-gradient(135deg,#5865F2,#404EED)}
+    .social-link.x{background:linear-gradient(135deg,#000,#434343)}
+    .social-link.reddit{background:linear-gradient(135deg,#FF4500,#FF5700)}
+    .social-link:hover{transform:translateY(-3px);box-shadow:0 5px 20px rgba(0,0,0,.3)}
+    /* Responsive */
+    @media(max-width:768px){
+      .skills-grid{grid-template-columns:1fr;gap:1rem}
+      .hero{min-height:50vh}
+    }
+    @keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  </style>
+</head>
+<body>
+  <canvas id="galaxy-canvas"></canvas>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Portfolio</h1>
+      <p>Full-stack developer specializing in modern web technologies</p>
+    </div>
+  </section>
+
+  <!-- Portfolio Cards -->
+  <section class="skills-section">
+    <div class="container">
+      <div class="skills-grid">
+        <a href="web_development.html" class="skill-card web-dev">
+          <span class="skill-icon material-symbols-outlined">code</span>
+          <h3 class="skill-title">Web Development</h3>
+          <p class="skill-description">Full-stack applications with modern frameworks</p>
+        </a>
+
+        <a href="web_design.html" class="skill-card web-design">
+          <span class="skill-icon material-symbols-outlined">palette</span>
+          <h3 class="skill-title">Web Design</h3>
+          <p class="skill-description">Beautiful, responsive UI/UX designs</p>
+        </a>
+
+        <a href="big_data.html" class="skill-card big-data">
+          <span class="skill-icon material-symbols-outlined">analytics</span>
+          <h3 class="skill-title">Big Data & Analysis</h3>
+          <p class="skill-description">Data pipelines and analytics solutions</p>
+        </a>
+
+        <a href="scraping_automation.html" class="skill-card automation">
+          <span class="skill-icon material-symbols-outlined">smart_toy</span>
+          <h3 class="skill-title">Scraping & Automation</h3>
+          <p class="skill-description">Intelligent bots and data extraction</p>
+        </a>
+
+        <a href="android_development.html" class="skill-card android">
+          <span class="skill-icon material-symbols-outlined">android</span>
+          <h3 class="skill-title">Android Development</h3>
+          <p class="skill-description">Native and cross-platform mobile apps</p>
+        </a>
+
+        <a href="api_development.html" class="skill-card api-dev">
+          <span class="skill-icon material-symbols-outlined">api</span>
+          <h3 class="skill-title">API Development</h3>
+          <p class="skill-description">RESTful & GraphQL APIs with micro-services</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tech Stack -->
+  <section class="tech-skills">
+    <div class="container">
+      <h2>My Tech Stack</h2>
+      <div class="skills-cloud">
+        <span class="skill-tag">HTML</span><span class="skill-tag">CSS</span><span class="skill-tag">JavaScript</span><span class="skill-tag">TypeScript</span><span class="skill-tag">React</span><span class="skill-tag">Node.js</span><span class="skill-tag">WordPress</span><span class="skill-tag">Azure</span><span class="skill-tag">GCP</span><span class="skill-tag">PostgreSQL</span><span class="skill-tag">MongoDB</span><span class="skill-tag">Docker</span><span class="skill-tag">Kubernetes</span><span class="skill-tag">Python</span><span class="skill-tag">TensorFlow</span><span class="skill-tag">Kotlin</span><span class="skill-tag">Swift</span><span class="skill-tag">Figma</span><span class="skill-tag">Git</span><span class="skill-tag">Redis</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Milestones -->
+  <section class="milestone-section">
+    <div class="container">
+      <h2>My Milestone</h2>
+      <div class="milestone-grid">
+        <div class="milestone-card">
+          <div class="milestone-number" data-target="500">0+</div>
+          <div class="milestone-label">Total Projects Completed</div>
+        </div>
+        <div class="milestone-card">
+          <div class="milestone-number" data-target="120">0+</div>
+          <div class="milestone-label">Websites Built</div>
+        </div>
+        <div class="milestone-card">
+          <div class="milestone-number" data-target="75">0+</div>
+          <div class="milestone-label">Big Data Projects</div>
+        </div>
+        <div class="milestone-card">
+          <div class="milestone-number" data-target="95">0+</div>
+          <div class="milestone-label">Web Designs Completed</div>
+        </div>
+        <div class="milestone-card">
+          <div class="milestone-number" data-target="25">0+</div>
+          <div class="milestone-label">Apps Developed</div>
+        </div>
+        <div class="milestone-card">
+          <div class="milestone-number" data-target="20">0+</div>
+          <div class="milestone-label">Intelligent Bots</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="testimonials">
+    <div class="container">
+      <h2>What Clients Say</h2>
+      <div class="testimonial-grid">
+        <div class="testimonial-card">
+          <p class="testimonial-text">"Exceptional work! Delivered a complex API solution ahead of schedule with outstanding results."</p>
+          <p class="testimonial-author">— Sarah Johnson, Tech Lead</p>
+        </div>
+        <div class="testimonial-card">
+          <p class="testimonial-text">"Transformed our data pipeline completely. The results speak for themselves – atleast 30 % performance improvement!"</p>
+          <p class="testimonial-author">— Michael Chen, Data Scientist</p>
+        </div>
+        <div class="testimonial-card">
+          <p class="testimonial-text">"The mobile app he built exceeded all expectations. Clean code and beautiful design."</p>
+          <p class="testimonial-author">— Emily Rodriguez, Product Manager</p>
+        </div>
+        <div class="testimonial-card">
+          <p class="testimonial-text">"Professional, responsive, and incredibly skilled. Our website redesign brought us 5× more conversions."</p>
+          <p class="testimonial-author">— David Park, Marketing Director</p>
+        </div>
+        <div class="testimonial-card">
+          <p class="testimonial-text">"The automation bots saved us 40 hours per week. ROI was achieved within the first month!"</p>
+          <p class="testimonial-author">— Lisa Zhang, Operations Manager</p>
+        </div>
+        <div class="testimonial-card">
+          <p class="testimonial-text">"Outstanding WordPress customizathen. He turned our vision into reality with pixel-perfect precision."</p>
+          <p class="testimonial-author">— James Wilson, CEO</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Objectives -->
+  <section class="objectives-section">
+    <div class="container">
+      <h2>My Objectives</h2>
+      <div class="objectives-container">
+        <div class="objective-card">
+          <span class="material-symbols-outlined objective-icon">payments</span>
+          <h3 class="objective-title">Affordable & Competitive Prices</h3>
+          <p class="objective-description">
+            Premium quality doesn't have to break the bank. I offer transparent, competitive pricing that scales with your needs.
+            My flexible packages ensure startups and enterprises alike get maximum value. No hidden fees, no surprises.
+          </p>
+        </div>
+        <div class="objective-card">
+          <span class="material-symbols-outlined objective-icon">schedule</span>
+          <h3 class="objective-title">Timely Delivery & 100 % Results</h3>
+          <p class="objective-description">
+            I treat deadlines as sacred commitments. Using agile methodologies and milestone-based development,
+            I ensure your project launches on time, every time. 100 % on-time delivery with zero compromise on quality.
+          </p>
+        </div>
+        <div class="objective-card">
+          <span class="material-symbols-outlined objective-icon">shield</span>
+          <h3 class="objective-title">No Upfront Payments</h3>
+          <p class="objective-description">
+            I believe in earning your trust before your investment. Start your project with zero upfront costs —
+            pay only when you see tangible results. Your satisfaction is guaranteed before any invoice is raised.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Social Links -->
+  <section class="social-section">
+    <div class="container">
+      <h2>Connect With Me</h2>
+      <div class="social-grid">
+        <a href="https://wa.me/your-number" class="social-link whatsapp">
+          <span class="material-symbols-outlined">chat</span>WhatsApp
+        </a>
+        <a href="https://discord.gg/AAtnyH5W" class="social-link discord" 
+        target="_blank" rel="noopener">
+          <span class="material-symbols-outlined">forum</span>Discord
+        </a>
+        <a href="https://x.com/your-handle" class="social-link x">
+          <span class="material-symbols-outlined">alternate_email</span>Twitter/X
+        </a>
+        <a href="https://www.reddit.com/u/Ok_Web_4209/" class="social-link reddit" target="_blank" rel="noopener">
+          <span class="material-symbols-outlined">groups</span>Reddit
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Galaxy Canvas & Counter Scripts -->
+  <script>
+    /* ---------- Galaxy Animation ---------- */
+    const canvas = document.getElementById('galaxy-canvas');
+    const ctx = canvas.getContext('2d');
+    let w, h, stars = [];
+    function resize() {
+      w = innerWidth;
+      h = innerHeight;
+      canvas.width = w;
+      canvas.height = h;
+    }
+    function init() {
+      resize();
+      stars = [];
+      for (let i = 0; i < 300; i++) {
+        stars.push({
+          x: Math.random() * w - w / 2,
+          y: Math.random() * h - h / 2,
+          z: Math.random() * 1000,
+          color: `hsl(${Math.random() * 360},100%,80%)`
+        });
+      }
+    }
+    function draw() {
+      ctx.fillStyle = 'rgba(0,0,5,.1)';
+      ctx.fillRect(0, 0, w, h);
+      stars.forEach(s => {
+        const px = s.x / s.z * 500 + w / 2;
+        const py = s.y / s.z * 500 + h / 2;
+        const size = (1 - s.z / 1000) * 2;
+        ctx.fillStyle = s.color;
+        ctx.beginPath();
+        ctx.arc(px, py, size, 0, Math.PI * 2);
+        ctx.fill();
+        s.z -= 0.5;
+        if (s.z <= 0) { s.z = 1000; }
+      });
+      requestAnimationFrame(draw);
+    }
+    window.addEventListener('resize', init);
+    init();
+    draw();
+
+    /* ---------- Counter Animation ---------- */
+    function animateCounter(el) {
+      const target = +el.dataset.target;
+      const increment = target / 100;
+      let current = 0;
+      const timer = setInterval(() => {
+        current += increment;
+        if (current >= target) {
+          el.textContent = target + '+';
+          clearInterval(timer);
+        } else {
+          el.textContent = Math.floor(current) + '+';
+        }
+      }, 30);
+    }
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.querySelectorAll('.milestone-number').forEach(animateCounter);
+          observer.unobserve(entry.target);
+        }
+      });
+    });
+    const milestoneGrid = document.querySelector('.milestone-grid');
+    if (milestoneGrid) observer.observe(milestoneGrid);
+  </script>
+</body>
+</html>
